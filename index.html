@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareFall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header>
+    <h1>CareFall</h1>
+  </header>
+
+  <main id="devicesList">
+    <!-- Devices will be dynamically added here -->
+  </main>
+
+  <footer>
+    <!-- Navigating to the "add-device.html" page -->
+    <a id="btnAdd" href="add-device.html">Add New Device</a>
+  </footer>
+
+  <!-- Firebase import and functions script -->
+  <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDVG2KQTfGUG3Tp5Xatg5oeLoSv3S56I6Q",
+          authDomain: "carefall-ee733.firebaseapp.com",
+          databaseURL: "https://carefall-ee733-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "carefall-ee733",
+          storageBucket: "carefall-ee733.appspot.com",
+          messagingSenderId: "223847377485",
+          appId: "1:223847377485:web:0e1a65e65edebbc66d4a04"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        import {getDatabase, ref, set, child, update, remove, get}
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    
+        const db = getDatabase();
+        var devices = [];
+        var deviceList = document.getElementById("devicesList");
+
+        function LoadData(){
+          const dbref = ref(db);
+
+          get(child(dbref, "Devices/"))
+            .then((snapshot) => {
+              if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                  const device = {
+                    code: childSnapshot.val().DeviceCode,
+                    status: childSnapshot.val().DeviceStatus,
+                    used: childSnapshot.val().DeviceUsed,
+                    name: childSnapshot.val().DeviceName,
+                    time: childSnapshot.val().DeviceTime
+                  };
+                  if(device.used === true) //Check if the device is in use/added to the list
+                  {
+                    devices.push(device); // Add device to array
+                  }
+                });
+                devices.forEach(device =>{
+                  const deviceElement = document.createElement('div');
+                  deviceElement.classList.add('device');
+
+                  const deviceNameElement = document.createElement('div');
+                  deviceNameElement.classList.add('device-name');
+                  if(device.name === "")
+                    deviceNameElement.textContent = device.code;
+                  else
+                    deviceNameElement.textContent = device.name;
+                        
+                  const statusCircleElement = document.createElement('div');
+                  statusCircleElement.classList.add('status-circle', `status-${device.status}`);
+
+                  
+                  deviceElement.appendChild(deviceNameElement);
+                  deviceElement.appendChild(statusCircleElement);
+                  deviceElement.onclick = function(){
+                  const deviceData = encodeURIComponent(JSON.stringify(device));
+                    window.location = "device-info.html?deviceData=" + deviceData;
+                  }
+                  devicesList.appendChild(deviceElement);
+                })
+              }
+            })
+            .catch((error) => {
+              console.error('Error fetching devices:', error);
+            });
+
+        }
+        // Call the function to retrieve and display data
+        LoadData();
+  </script>
+
+</body>
+
+</html>
