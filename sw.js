@@ -28,12 +28,12 @@ self.addEventListener('install', event => {
     caches.open('CareFall-v1').then(cache => {
       return cache.addAll([
         '/',
-        '/index.html',
-        '/add-device.html',
-        '/device-info.html',
-        '/styles.css',
-        '/script.js',
-        '/CareFallLogo.png'
+        'index.html',
+        'add-device.html',
+        'device-info.html',
+        'styles.css',
+        'script.js',
+        'CareFallLogo.png'
       ]);
     })
   );
