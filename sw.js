@@ -34,7 +34,11 @@ self.addEventListener('install', event => {
         'styles.css',
         'script.js',
         'CareFallLogo.png'
-      ]);
+      ]).then(() => {
+        console.log('All resources have been cached successfully.');
+      }).catch(error => {
+        console.error('Cache.addAll failed:', error);
+      });
     })
   );
 });
