@@ -106,6 +106,45 @@
       function goBack() {
         window.location.href = 'index.html';
       } 
+      var notifSent = false;
+      var prevState = false;
+      function checkFall(){
+      const dbref = ref(db);
+        get(child(dbref, "Devices/"))
+          .then((snapshot) => {
+            //console.log('Snapshot:', snapshot.val());
+            if (snapshot.exists()) {
+              snapshot.forEach((childSnapshot) => {
+                const device = {
+                  code: childSnapshot.val().DeviceCode,
+                  status: childSnapshot.val().DeviceStatus,
+                  used: childSnapshot.val().DeviceUsed,
+                  name: childSnapshot.val().DeviceName,
+                  fallDetected: childSnapshot.val().FallDetected,
+                  active: childSnapshot.val().DeviceActive
+                };
+                //console.log('Device:', device);
+                if(prevState === false && device.fallDetected === true && device.active === true){
+                  prevState =true;
+                  if(device.used === true && device.status === "active" && device.fallDetected === true && notifSent === false){
+                  triggerPushNotification("Fall detected on device: " + device.name);
+                  notifSent=true;
+                }
+                }
+                if(prevState===true && device.fallDetected === false && device.active === true){
+                  prevState=false;
+                  notifSent = false;
+                }
+                //alert("Fall Detected on device " + device.name);
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching devices:', error);
+          });
+        }
+      checkFall();
+      window.setInterval(checkFall, 200);
   // Call the function to retrieve and display data
       SelectData();
       btnAdd.addEventListener('click', ChangeData);

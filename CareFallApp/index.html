@@ -6,6 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CareFall</title>
   <link rel="stylesheet" href="style.css">
+  <script src="sw.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  </script>
 </head>
 
 <body>
@@ -49,7 +61,45 @@
         const db = getDatabase();
         var devices = [];
         var deviceList = document.getElementById("devicesList");
-
+        var notifSent = false;
+        var prevState = false;
+        function checkFall(){
+          const dbref = ref(db);
+          get(child(dbref, "Devices/"))
+          .then((snapshot) => {
+            //console.log('Snapshot:', snapshot.val());
+            if (snapshot.exists()) {
+              snapshot.forEach((childSnapshot) => {
+                const device = {
+                  code: childSnapshot.val().DeviceCode,
+                  status: childSnapshot.val().DeviceStatus,
+                  used: childSnapshot.val().DeviceUsed,
+                  name: childSnapshot.val().DeviceName,
+                  fallDetected: childSnapshot.val().FallDetected,
+                  active: childSnapshot.val().DeviceActive
+                };
+                //console.log('Device:', device);
+                if(prevState === false && device.fallDetected === true && device.active === true){
+                  prevState =true;
+                  if(device.used === true && device.status === "active" && device.fallDetected === true && notifSent === false){
+                  triggerPushNotification("Fall detected on device: " + device.name);
+                  notifSent=true;
+                }
+                }
+                if(prevState===true && device.fallDetected === false && device.active === true){
+                  prevState=false;
+                  notifSent = false;
+                }
+                //alert("Fall Detected on device " + device.name);
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching devices:', error);
+          });
+        }
+        checkFall();
+        window.setInterval(checkFall, 200);
         function LoadData(){
           const dbref = ref(db);
 
@@ -97,12 +147,12 @@
             .catch((error) => {
               console.error('Error fetching devices:', error);
             });
-
         }
+
         // Call the function to retrieve and display data
         LoadData();
+      
   </script>
-
 </body>
 
 </html>
