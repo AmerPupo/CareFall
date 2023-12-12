@@ -25,7 +25,7 @@ self.addEventListener('notificationclick', function(event) {
   });
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open('your-cache-name').then(cache => {
+    caches.open('CareFall-v1').then(cache => {
       return cache.addAll([
         '/',
         '/index.html',
