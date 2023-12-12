@@ -118,7 +118,7 @@
         update(ref(db, `Devices/${deviceCodeValue}`), {
           DeviceName: deviceName.value,
           DeviceStatus: statusSend,
-          DeviceTime: deviceTime.value
+          DeviceTime: parseInt(deviceTime.value)
         })
           .then(() => {
             alert("Device succesffully edited");
